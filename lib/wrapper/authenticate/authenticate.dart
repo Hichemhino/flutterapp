@@ -1,28 +1,25 @@
 import 'package:flutter/material.dart';
-import 'package:flutterappcarsecur/wrapper/authenticate/Sign/sign.dart';
-import 'package:flutterappcarsecur/wrapper/authenticate/Sign/register.dart';
-import 'package:flutterappcarsecur/wrapper/wrapper.dart';
+import 'package:flutterappcarsecur/wrapper/authenticate/Sign/signemail.dart';
+import 'package:flutterappcarsecur/wrapper/home/page2.dart';
 
 
 
 class Authenticate extends StatefulWidget {
+  bool etat;
+  Authenticate({this.etat});
   @override
   _AuthenticateState createState() => _AuthenticateState();
 }
 
 class _AuthenticateState extends State<Authenticate> {
-  int screen_state =0;
-
+  //int screen_state =0;
   @override
   Widget build(BuildContext context) {
-    if (screen_state == 0){
-      return Register();
+    if (widget.etat == false){
+      return Suite();
     }
-    else if (screen_state ==1){
+    else{
       return Sign();
-    }
-    else {
-      return Wrapper();
     }
 
   }

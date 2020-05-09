@@ -1,6 +1,7 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:flutterappcarsecur/services/auth.dart';
+import 'package:flutterappcarsecur/wrapper/authenticate/Sign/signemail.dart';
 
 void main() =>
     runApp(
@@ -8,7 +9,8 @@ void main() =>
     );
 
 class Suite extends StatefulWidget {
-  @override
+  final String num;
+  Suite({this.num});
   _SuiteState createState() => _SuiteState();
 }
 
@@ -16,25 +18,32 @@ class _SuiteState extends State<Suite> {
   int etat_led;
   bool open = true;
   final FirebaseDatabase _database = FirebaseDatabase.instance;
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-
+  Services _auth = Services();
+  String numchassi;
+  
 
   @override
   Widget build(BuildContext context) {
-    // TODO: implement build
+    if (widget.num != null){
+       numchassi = widget.num;
+    }
+
+
     final database_LED = FirebaseDatabase.instance.reference();
     Map etat_du_system = Map();
     return Scaffold(
       appBar: AppBar(
         title: Text('Main Page'),
-
         backgroundColor: Colors.green[900],
         actions: <Widget>[
           FlatButton.icon(
             icon: Icon(Icons.power_settings_new,color: Colors.white,),
             label: Text('Logout', style : TextStyle(color: Colors.white,letterSpacing: 1.0 ),),
             onPressed: () async{
-              await _auth.signOut();
+               dynamic result = _auth.singOutAccount();
+               if(result != null){
+                 Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => Sign()),);
+               }
             },
           ),
         ],
@@ -50,7 +59,8 @@ class _SuiteState extends State<Suite> {
                     child: RaisedButton(
                       child: Text("Light ON"),
                       onPressed: () async {
-                        await _database.reference().update({
+                        print("je suis la " + numchassi);
+                        await _database.reference().child(numchassi).update({
                           "state_parking_light": 2,
                         });
                       },
@@ -61,7 +71,7 @@ class _SuiteState extends State<Suite> {
                     child: RaisedButton(
                       child: Text("Light OFF"),
                       onPressed: () async {
-                        await _database.reference().update({
+                        await _database.reference().child(numchassi).update({
                           "state_parking_light": -1,
                         });
                       },
@@ -71,7 +81,7 @@ class _SuiteState extends State<Suite> {
                       padding: const EdgeInsets.only(top: 8, left: 32),
                       child:
                       StreamBuilder(
-                        stream: database_LED.onValue,
+                        stream: database_LED.child(numchassi).onValue,
                         builder: (BuildContext context, snapshot) {
                           if (snapshot.connectionState == ConnectionState.waiting) {
                             return Text(
@@ -110,7 +120,7 @@ class _SuiteState extends State<Suite> {
                   child: RaisedButton(
                     child: Text("Clima ON"),
                     onPressed: () async {
-                      await _database.reference().update({
+                      await _database.reference().child(numchassi).update({
                         "state_clima": 2,
                       });
                     },
@@ -121,7 +131,7 @@ class _SuiteState extends State<Suite> {
                   child: RaisedButton(
                     child: Text("clima OFF"),
                     onPressed: () async {
-                      await _database.reference().update({
+                      await _database.reference().child(numchassi).update({
                         "state_clima": -1,
                       });
                     },
@@ -131,7 +141,7 @@ class _SuiteState extends State<Suite> {
                     padding: const EdgeInsets.only(top: 8, left: 32),
                     child:
                     StreamBuilder(
-                      stream: database_LED.onValue,
+                      stream: database_LED.child(numchassi).onValue,
                       builder: (BuildContext context, snapshot) {
                         if (snapshot.connectionState == ConnectionState.waiting) {
                           return Text(
@@ -162,13 +172,14 @@ class _SuiteState extends State<Suite> {
               ),
 
               /* Window */
-              Row(children: <Widget>[
+              Row(
+                children: <Widget>[
                 Padding(
                 padding: const EdgeInsets.only(top: 8, left: 8),
                 child: RaisedButton(
                   child: Text("Window-up"),
                   onPressed: () async {
-                    await _database.reference().update({
+                    await _database.reference().child(numchassi).update({
                       "state_window": 2,
                     });
                   },
@@ -179,7 +190,7 @@ class _SuiteState extends State<Suite> {
                   child: RaisedButton(
                     child: Text("Window-Down"),
                     onPressed: () async {
-                      await _database.reference().update({
+                      await _database.reference().child(numchassi).update({
                         "state_window": -1,
                       });
                     },
@@ -189,7 +200,7 @@ class _SuiteState extends State<Suite> {
                     padding: const EdgeInsets.only(top: 8, left: 32),
                     child:
                     StreamBuilder(
-                      stream: database_LED.onValue,
+                      stream: database_LED.child(numchassi).onValue,
                       builder: (BuildContext context, snapshot) {
                         if (snapshot.connectionState == ConnectionState.waiting) {
                           return Text(
@@ -227,7 +238,7 @@ class _SuiteState extends State<Suite> {
                 child: RaisedButton(
                   child: Text("Door lock"),
                   onPressed: () async {
-                    await _database.reference().update({
+                    await _database.reference().child(numchassi).update({
                       "state_door_lock": 2,
                     });
                   },
@@ -238,7 +249,7 @@ class _SuiteState extends State<Suite> {
                     child: RaisedButton(
                       child: Text("door open"),
                       onPressed: () async {
-                        await _database.reference().update({
+                        await _database.reference().child(numchassi).update({
                           "state_door_lock": -1,
                         });
                       },
@@ -248,7 +259,7 @@ class _SuiteState extends State<Suite> {
                     padding: const EdgeInsets.only(top: 8, left: 32),
                     child:
                     StreamBuilder(
-                      stream: database_LED.onValue,
+                      stream: database_LED.child(numchassi).onValue,
                       builder: (BuildContext context, snapshot) {
                         if (snapshot.connectionState == ConnectionState.waiting) {
                           return Text(
@@ -286,7 +297,7 @@ class _SuiteState extends State<Suite> {
                     child: RaisedButton(
                       child: Text("Siren On"),
                       onPressed: () async {
-                        await _database.reference().update({
+                        await _database.reference().child(numchassi).update({
                           "state_alarme": 2,
                         });
                       },
@@ -297,7 +308,7 @@ class _SuiteState extends State<Suite> {
                     child: RaisedButton(
                       child: Text("Siren off"),
                       onPressed: () async {
-                        await _database.reference().update({
+                        await _database.reference().child(numchassi).update({
                           "state_alarme": -1,
                         });
                       },
@@ -307,7 +318,7 @@ class _SuiteState extends State<Suite> {
                       padding: const EdgeInsets.only(top: 8, left: 32),
                       child:
                       StreamBuilder(
-                        stream: database_LED.onValue,
+                        stream: database_LED.child(numchassi).onValue,
                         builder: (BuildContext context, snapshot) {
                           if (snapshot.connectionState == ConnectionState.waiting) {
                             return Text(
@@ -345,7 +356,7 @@ class _SuiteState extends State<Suite> {
                     child: RaisedButton(
                       child: Text("starter On"),
                       onPressed: () async {
-                        await _database.reference().update({
+                        await _database.reference().child(numchassi).update({
                           "state_car_starter": 2,
                         });
                       },
@@ -356,7 +367,7 @@ class _SuiteState extends State<Suite> {
                     child: RaisedButton(
                       child: Text("starter off"),
                       onPressed: () async {
-                        await _database.reference().update({
+                        await _database.reference().child(numchassi).update({
                           "state_car_starter": -1,
                         });
                       },
@@ -366,7 +377,7 @@ class _SuiteState extends State<Suite> {
                       padding: const EdgeInsets.only(top: 8, left: 32),
                       child:
                       StreamBuilder(
-                        stream: database_LED.onValue,
+                        stream: database_LED.child(numchassi).onValue,
                         builder: (BuildContext context, snapshot) {
                           if (snapshot.connectionState == ConnectionState.waiting) {
                             return Text(

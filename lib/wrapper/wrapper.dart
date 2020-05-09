@@ -1,16 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutterappcarsecur/wrapper/authenticate/Sign/register.dart';
-import 'package:flutterappcarsecur/wrapper/authenticate/Sign/sign.dart';
-import 'home/page2.dart';
-import 'authenticate/authenticate.dart';
-
+import 'package:flutterappcarsecur/wrapper/authenticate/Sign/registeremail.dart';
+import 'package:flutterappcarsecur/wrapper/authenticate/Sign/registerphone.dart';
 
 class Wrapper extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    TextEditingController utilisateur_controller = TextEditingController();
-    TextEditingController mot_de_passe = TextEditingController();
-    bool passwordhiden = true;
     return Scaffold(
       resizeToAvoidBottomPadding: false,
       appBar: AppBar(
@@ -19,40 +13,29 @@ class Wrapper extends StatelessWidget {
         backgroundColor: Colors.green[900],
       ),
       body: SingleChildScrollView(
-        child: Column(
-          children: <Widget>[
+        child:
             Center(
-              child: Container(
-                  height: 100,
-                  width: 100,
-                  padding: const EdgeInsets.only(top: 30),
-                  child:
-                  CircleAvatar(
-                    backgroundColor: Colors.white,
-                    child: ClipRRect(borderRadius: BorderRadius.circular(100),
-                        child: Image.asset("assets/logo.png",
-                            fit: BoxFit.fill)),
-                  )
-              ),
-            ),
-
-            RaisedButton(
+              child:
+               Column(
+                 children: <Widget>[
+              RaisedButton.icon(
+              icon: Icon(Icons.phone),
               color: Colors.lightGreen[400],
-              child: Text("Se connecter"), onPressed: () async {
+              label: Text("via phone"), onPressed: ()  {
               Navigator.of(context).push(
-                MaterialPageRoute(builder: (context) => Sign()),);
-  },
-            ),
-            SizedBox(height: 10.0),
-            RaisedButton(
+                MaterialPageRoute(builder: (context) => Phone()),);}),
+              SizedBox(height: 10.0),
+              RaisedButton.icon(
+              icon: Icon(Icons.email),
               color: Colors.lightGreen[400],
-              child: Text("S'inscrire "), onPressed: () async {
+              label: Text("via email"), onPressed: ()  {
               Navigator.of(context).push(
                 MaterialPageRoute(builder: (context) => Register()),);
             },
-            ),
+            )
           ],
         ),
+      ),
       ),
     );
   }
