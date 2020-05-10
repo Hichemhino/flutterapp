@@ -49,19 +49,80 @@ class _SuiteState extends State<Suite> {
         ],
       ),
       body:
-          Column(
-            children: <Widget>[
-              /* light */
-              Row(
-                children: <Widget>[
+          SingleChildScrollView(
+                      child: Column(
+              children: <Widget>[
+                /* light */
+                Row(
+                  children: <Widget>[
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8, left: 8),
+                      child: RaisedButton(
+                        child: Text("Light ON"),
+                        onPressed: () async {
+                          print("je suis la " + numchassi);
+                          await _database.reference().child(numchassi).update({
+                            "state_parking_light": 2,
+                          });
+                        },
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8, left: 8),
+                      child: RaisedButton(
+                        child: Text("Light OFF"),
+                        onPressed: () async {
+                          await _database.reference().child(numchassi).update({
+                            "state_parking_light": -1,
+                          });
+                        },
+                      ),
+                    ),
+                    Padding(
+                        padding: const EdgeInsets.only(top: 8, left: 32),
+                        child:
+                        StreamBuilder(
+                          stream: database_LED.child(numchassi).onValue,
+                          builder: (BuildContext context, snapshot) {
+                            if (snapshot.connectionState == ConnectionState.waiting) {
+                              return Text(
+                                "wait!",
+                              );
+                            }
+                            else if (snapshot.hasError) {
+                              return Text(
+                                snapshot.error,
+                              );
+                            }
+                            else if (snapshot.hasData) {
+                              etat_du_system = snapshot.data.snapshot.value;
+                              if (etat_du_system["state_parking_light"] == 1)
+                                return Icon(Icons.lightbulb_outline , color : Colors.deepOrange);
+                              else if (etat_du_system["state_parking_light"] == 0)
+                                return Icon(Icons.lightbulb_outline);
+                              else
+                                return CircularProgressIndicator();
+                            }
+                            else {
+                            return Text('null data!');
+                            }
+                          },
+                        )
+                    ),
+
+                  ],
+                ),
+
+                /* Climat */
+                Row(
+                  children : <Widget>[
                   Padding(
                     padding: const EdgeInsets.only(top: 8, left: 8),
                     child: RaisedButton(
-                      child: Text("Light ON"),
+                      child: Text("Clima ON"),
                       onPressed: () async {
-                        print("je suis la " + numchassi);
                         await _database.reference().child(numchassi).update({
-                          "state_parking_light": 2,
+                          "state_clima": 2,
                         });
                       },
                     ),
@@ -69,10 +130,10 @@ class _SuiteState extends State<Suite> {
                   Padding(
                     padding: const EdgeInsets.only(top: 8, left: 8),
                     child: RaisedButton(
-                      child: Text("Light OFF"),
+                      child: Text("clima OFF"),
                       onPressed: () async {
                         await _database.reference().child(numchassi).update({
-                          "state_parking_light": -1,
+                          "state_clima": -1,
                         });
                       },
                     ),
@@ -95,319 +156,260 @@ class _SuiteState extends State<Suite> {
                           }
                           else if (snapshot.hasData) {
                             etat_du_system = snapshot.data.snapshot.value;
-                            if (etat_du_system["state_parking_light"] == 1)
-                              return Icon(Icons.lightbulb_outline , color : Colors.deepOrange);
-                            else if (etat_du_system["state_parking_light"] == 0)
-                              return Icon(Icons.lightbulb_outline);
+                            if (etat_du_system["state_clima"] == 1)
+                              return Icon(Icons.ac_unit, color: Colors.blue);
+                            else if (etat_du_system["state_clima"] == 0)
+                              return Icon(Icons.ac_unit , color : Colors.red);
                             else
                               return CircularProgressIndicator();
                           }
                           else {
-                          return Text('null data!');
+                            return Text('null data!');
                           }
                         },
                       )
                   ),
+                    ]
+                ),
 
+                /* Window */
+                Row(
+                  children: <Widget>[
+                  Padding(
+                  padding: const EdgeInsets.only(top: 8, left: 8),
+                  child: RaisedButton(
+                    child: Text("Window-up"),
+                    onPressed: () async {
+                      await _database.reference().child(numchassi).update({
+                        "state_window": 2,
+                      });
+                    },
+                  ),
+                ),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8, left: 8),
+                    child: RaisedButton(
+                      child: Text("Window-Down"),
+                      onPressed: () async {
+                        await _database.reference().child(numchassi).update({
+                          "state_window": -1,
+                        });
+                      },
+                    ),
+                  ),
+                  Padding(
+                      padding: const EdgeInsets.only(top: 8, left: 32),
+                      child:
+                      StreamBuilder(
+                        stream: database_LED.child(numchassi).onValue,
+                        builder: (BuildContext context, snapshot) {
+                          if (snapshot.connectionState == ConnectionState.waiting) {
+                            return Text(
+                              "wait!",
+                            );
+                          }
+                          else if (snapshot.hasError) {
+                            return Text(
+                              snapshot.error,
+                            );
+                          }
+                          else if (snapshot.hasData) {
+                            etat_du_system = snapshot.data.snapshot.value;
+                            if (etat_du_system["state_window"] == 1)
+                              return Icon(Icons.arrow_upward);
+                            else if (etat_du_system["state_window"] == 0)
+                              return Icon(Icons.arrow_downward);
+                            else
+                              return CircularProgressIndicator();
+                          }
+                          else {
+                            return Text('null data!');
+                          }
+                        },
+                      )
+                  ),
                 ],
-              ),
+                ),
 
-              /* Climat */
-              Row(
-                children : <Widget>[
-                Padding(
+                /* Door lock */
+                Row(
+                  children: <Widget>[
+                    Padding(
                   padding: const EdgeInsets.only(top: 8, left: 8),
                   child: RaisedButton(
-                    child: Text("Clima ON"),
+                    child: Text("Door lock"),
                     onPressed: () async {
                       await _database.reference().child(numchassi).update({
-                        "state_clima": 2,
+                        "state_door_lock": 2,
                       });
                     },
                   ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.only(top: 8, left: 8),
-                  child: RaisedButton(
-                    child: Text("clima OFF"),
-                    onPressed: () async {
-                      await _database.reference().child(numchassi).update({
-                        "state_clima": -1,
-                      });
-                    },
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8, left: 8),
+                      child: RaisedButton(
+                        child: Text("door open"),
+                        onPressed: () async {
+                          await _database.reference().child(numchassi).update({
+                            "state_door_lock": -1,
+                          });
+                        },
+                      ),
                   ),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8, left: 32),
+                      child:
+                      StreamBuilder(
+                        stream: database_LED.child(numchassi).onValue,
+                        builder: (BuildContext context, snapshot) {
+                          if (snapshot.connectionState == ConnectionState.waiting) {
+                            return Text(
+                              "wait!",
+                            );
+                          }
+                          else if (snapshot.hasError) {
+                            return Text(
+                              snapshot.error,
+                            );
+                          }
+                          else if (snapshot.hasData) {
+                            etat_du_system = snapshot.data.snapshot.value;
+                            if (etat_du_system["state_door_lock"] == 1)
+                              return Icon(Icons.lock_outline);
+                            else if (etat_du_system["state_door_lock"] == 0)
+                              return Icon(Icons.lock_open);
+                            else
+                              return CircularProgressIndicator();
+                          }
+                          else {
+                            return Text('null data!');
+                          }
+                        },
+                      )
+                  ),]
+                  ,
                 ),
-                Padding(
-                    padding: const EdgeInsets.only(top: 8, left: 32),
-                    child:
-                    StreamBuilder(
-                      stream: database_LED.child(numchassi).onValue,
-                      builder: (BuildContext context, snapshot) {
-                        if (snapshot.connectionState == ConnectionState.waiting) {
-                          return Text(
-                            "wait!",
-                          );
-                        }
-                        else if (snapshot.hasError) {
-                          return Text(
-                            snapshot.error,
-                          );
-                        }
-                        else if (snapshot.hasData) {
-                          etat_du_system = snapshot.data.snapshot.value;
-                          if (etat_du_system["state_clima"] == 1)
-                            return Icon(Icons.ac_unit, color: Colors.blue);
-                          else if (etat_du_system["state_clima"] == 0)
-                            return Icon(Icons.ac_unit , color : Colors.red);
-                          else
-                            return CircularProgressIndicator();
-                        }
-                        else {
-                          return Text('null data!');
-                        }
-                      },
-                    )
-                ),
-                  ]
-              ),
 
-              /* Window */
-              Row(
-                children: <Widget>[
-                Padding(
-                padding: const EdgeInsets.only(top: 8, left: 8),
-                child: RaisedButton(
-                  child: Text("Window-up"),
-                  onPressed: () async {
-                    await _database.reference().child(numchassi).update({
-                      "state_window": 2,
-                    });
-                  },
+                /*siren */
+                Row(
+                  children: <Widget>[
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8, left: 8),
+                      child: RaisedButton(
+                        child: Text("Siren On"),
+                        onPressed: () async {
+                          await _database.reference().child(numchassi).update({
+                            "state_alarme": 2,
+                          });
+                        },
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8, left: 8),
+                      child: RaisedButton(
+                        child: Text("Siren off"),
+                        onPressed: () async {
+                          await _database.reference().child(numchassi).update({
+                            "state_alarme": -1,
+                          });
+                        },
+                      ),
+                    ),
+                    Padding(
+                        padding: const EdgeInsets.only(top: 8, left: 32),
+                        child:
+                        StreamBuilder(
+                          stream: database_LED.child(numchassi).onValue,
+                          builder: (BuildContext context, snapshot) {
+                            if (snapshot.connectionState == ConnectionState.waiting) {
+                              return Text(
+                                "wait!",
+                              );
+                            }
+                            else if (snapshot.hasError) {
+                              return Text(
+                                snapshot.error,
+                              );
+                            }
+                            else if (snapshot.hasData) {
+                              etat_du_system = snapshot.data.snapshot.value;
+                              if (etat_du_system["state_alarme"] == 1)
+                                return Icon(Icons.alarm_on);
+                              else if (etat_du_system["state_alarme"] == 0)
+                                return Icon(Icons.alarm_off);
+                              else
+                                return CircularProgressIndicator();
+                            }
+                            else {
+                              return Text('null data!');
+                            }
+                          },
+                        )
+                    ),
+                  ],
                 ),
-              ),
-                Padding(
-                  padding: const EdgeInsets.only(top: 8, left: 8),
-                  child: RaisedButton(
-                    child: Text("Window-Down"),
-                    onPressed: () async {
-                      await _database.reference().child(numchassi).update({
-                        "state_window": -1,
-                      });
-                    },
-                  ),
+
+                /*car starter */
+                Row(
+                  children: <Widget>[
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8, left: 8),
+                      child: RaisedButton(
+                        child: Text("starter On"),
+                        onPressed: () async {
+                          await _database.reference().child(numchassi).update({
+                            "state_car_starter": 2,
+                          });
+                        },
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8, left: 8),
+                      child: RaisedButton(
+                        child: Text("starter off"),
+                        onPressed: () async {
+                          await _database.reference().child(numchassi).update({
+                            "state_car_starter": -1,
+                          });
+                        },
+                      ),
+                    ),
+                    Padding(
+                        padding: const EdgeInsets.only(top: 8, left: 32),
+                        child:
+                        StreamBuilder(
+                          stream: database_LED.child(numchassi).onValue,
+                          builder: (BuildContext context, snapshot) {
+                            if (snapshot.connectionState == ConnectionState.waiting) {
+                              return Text(
+                                "wait!",
+                              );
+                            }
+                            else if (snapshot.hasError) {
+                              return Text(
+                                snapshot.error,
+                              );
+                            }
+                            else if (snapshot.hasData) {
+                              etat_du_system = snapshot.data.snapshot.value;
+                              if (etat_du_system["state_car_starter"] == 1)
+                                return Icon(Icons.assignment_turned_in);
+                              else if (etat_du_system["state_car_starter"] == 0)
+                                return Icon(Icons.assignment_late);
+                              else
+                                return CircularProgressIndicator();
+                            }
+                            else {
+                              return Text('null data!');
+                            }
+                          },
+                        )
+                    ),
+                  ],
                 ),
-                Padding(
-                    padding: const EdgeInsets.only(top: 8, left: 32),
-                    child:
-                    StreamBuilder(
-                      stream: database_LED.child(numchassi).onValue,
-                      builder: (BuildContext context, snapshot) {
-                        if (snapshot.connectionState == ConnectionState.waiting) {
-                          return Text(
-                            "wait!",
-                          );
-                        }
-                        else if (snapshot.hasError) {
-                          return Text(
-                            snapshot.error,
-                          );
-                        }
-                        else if (snapshot.hasData) {
-                          etat_du_system = snapshot.data.snapshot.value;
-                          if (etat_du_system["state_window"] == 1)
-                            return Icon(Icons.arrow_upward);
-                          else if (etat_du_system["state_window"] == 0)
-                            return Icon(Icons.arrow_downward);
-                          else
-                            return CircularProgressIndicator();
-                        }
-                        else {
-                          return Text('null data!');
-                        }
-                      },
-                    )
-                ),
+
               ],
-              ),
-
-              /* Door lock */
-              Row(
-                children: <Widget>[
-                  Padding(
-                padding: const EdgeInsets.only(top: 8, left: 8),
-                child: RaisedButton(
-                  child: Text("Door lock"),
-                  onPressed: () async {
-                    await _database.reference().child(numchassi).update({
-                      "state_door_lock": 2,
-                    });
-                  },
-                ),
-              ),
-                  Padding(
-                    padding: const EdgeInsets.only(top: 8, left: 8),
-                    child: RaisedButton(
-                      child: Text("door open"),
-                      onPressed: () async {
-                        await _database.reference().child(numchassi).update({
-                          "state_door_lock": -1,
-                        });
-                      },
-                    ),
-                ),
-                  Padding(
-                    padding: const EdgeInsets.only(top: 8, left: 32),
-                    child:
-                    StreamBuilder(
-                      stream: database_LED.child(numchassi).onValue,
-                      builder: (BuildContext context, snapshot) {
-                        if (snapshot.connectionState == ConnectionState.waiting) {
-                          return Text(
-                            "wait!",
-                          );
-                        }
-                        else if (snapshot.hasError) {
-                          return Text(
-                            snapshot.error,
-                          );
-                        }
-                        else if (snapshot.hasData) {
-                          etat_du_system = snapshot.data.snapshot.value;
-                          if (etat_du_system["state_door_lock"] == 1)
-                            return Icon(Icons.lock_outline);
-                          else if (etat_du_system["state_door_lock"] == 0)
-                            return Icon(Icons.lock_open);
-                          else
-                            return CircularProgressIndicator();
-                        }
-                        else {
-                          return Text('null data!');
-                        }
-                      },
-                    )
-                ),]
-                ,
-              ),
-
-              /*siren */
-              Row(
-                children: <Widget>[
-                  Padding(
-                    padding: const EdgeInsets.only(top: 8, left: 8),
-                    child: RaisedButton(
-                      child: Text("Siren On"),
-                      onPressed: () async {
-                        await _database.reference().child(numchassi).update({
-                          "state_alarme": 2,
-                        });
-                      },
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(top: 8, left: 8),
-                    child: RaisedButton(
-                      child: Text("Siren off"),
-                      onPressed: () async {
-                        await _database.reference().child(numchassi).update({
-                          "state_alarme": -1,
-                        });
-                      },
-                    ),
-                  ),
-                  Padding(
-                      padding: const EdgeInsets.only(top: 8, left: 32),
-                      child:
-                      StreamBuilder(
-                        stream: database_LED.child(numchassi).onValue,
-                        builder: (BuildContext context, snapshot) {
-                          if (snapshot.connectionState == ConnectionState.waiting) {
-                            return Text(
-                              "wait!",
-                            );
-                          }
-                          else if (snapshot.hasError) {
-                            return Text(
-                              snapshot.error,
-                            );
-                          }
-                          else if (snapshot.hasData) {
-                            etat_du_system = snapshot.data.snapshot.value;
-                            if (etat_du_system["state_alarme"] == 1)
-                              return Icon(Icons.alarm_on);
-                            else if (etat_du_system["state_alarme"] == 0)
-                              return Icon(Icons.alarm_off);
-                            else
-                              return CircularProgressIndicator();
-                          }
-                          else {
-                            return Text('null data!');
-                          }
-                        },
-                      )
-                  ),
-                ],
-              ),
-
-              /*car starter */
-              Row(
-                children: <Widget>[
-                  Padding(
-                    padding: const EdgeInsets.only(top: 8, left: 8),
-                    child: RaisedButton(
-                      child: Text("starter On"),
-                      onPressed: () async {
-                        await _database.reference().child(numchassi).update({
-                          "state_car_starter": 2,
-                        });
-                      },
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(top: 8, left: 8),
-                    child: RaisedButton(
-                      child: Text("starter off"),
-                      onPressed: () async {
-                        await _database.reference().child(numchassi).update({
-                          "state_car_starter": -1,
-                        });
-                      },
-                    ),
-                  ),
-                  Padding(
-                      padding: const EdgeInsets.only(top: 8, left: 32),
-                      child:
-                      StreamBuilder(
-                        stream: database_LED.child(numchassi).onValue,
-                        builder: (BuildContext context, snapshot) {
-                          if (snapshot.connectionState == ConnectionState.waiting) {
-                            return Text(
-                              "wait!",
-                            );
-                          }
-                          else if (snapshot.hasError) {
-                            return Text(
-                              snapshot.error,
-                            );
-                          }
-                          else if (snapshot.hasData) {
-                            etat_du_system = snapshot.data.snapshot.value;
-                            if (etat_du_system["state_car_starter"] == 1)
-                              return Icon(Icons.assignment_turned_in);
-                            else if (etat_du_system["state_car_starter"] == 0)
-                              return Icon(Icons.assignment_late);
-                            else
-                              return CircularProgressIndicator();
-                          }
-                          else {
-                            return Text('null data!');
-                          }
-                        },
-                      )
-                  ),
-                ],
-              ),
-
-            ],
+            ),
           ),
     );
   }

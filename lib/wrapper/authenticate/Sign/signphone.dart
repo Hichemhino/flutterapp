@@ -2,6 +2,8 @@ import 'package:connectivity/connectivity.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutterappcarsecur/services/auth.dart';
+import 'package:flutterappcarsecur/wrapper/authenticate/Sign/motdepasse.dart';
+import 'package:flutterappcarsecur/wrapper/authenticate/Sign/registerphone.dart';
 import 'package:flutterappcarsecur/wrapper/authenticate/Sign/signemail.dart';
 import 'package:flutterappcarsecur/wrapper/home/page2.dart';
 
@@ -25,7 +27,7 @@ class _SignphoneState extends State<Signphone> {
   
   bool loading = true;
   String erreur = '';
-  String numchassi,numphone;
+  String uid_password,numphone;
   String text = '';
   @override
   Widget build(BuildContext context) {
@@ -36,12 +38,18 @@ class _SignphoneState extends State<Signphone> {
   }
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.green,
-        title: Text("Sign in with phone"),
+        backgroundColor: Colors.green[400],
+        title: RichText(
+                text: TextSpan(
+                    children: [
+                        TextSpan(text:"connexion",style: TextStyle( fontSize: 20 )),      
+                      ],
+                ),
+              ),
           actions: <Widget>[
           FlatButton.icon(
-            icon: Icon(Icons.mail,color: Colors.white,),
-            label: Text('Sign In', style : TextStyle(color: Colors.white,letterSpacing: 1.0 ),),
+            icon: Icon(Icons.email,color: Colors.white,),
+            label: Text('', style : TextStyle(color: Colors.white ),),
             onPressed: () async{
                dynamic result = _auth.singOutAccount();
                if(result != null){
@@ -51,89 +59,108 @@ class _SignphoneState extends State<Signphone> {
           ),
           ],
       ),
-      body: Center(
-        child : Form(
-          key: _formKey,
-          child: Column(
-            children : <Widget>[
-                       // numero de phone
-                        TextFormField(
-                          maxLength: 13,
-                          decoration: InputDecoration(hintText: "Votre numéro de téléphone"),
-                          controller: _numerodephone,
-                          validator: (val) => (_phoneRegex.hasMatch(val)) ? null : "numéro de telephone incorrecte",
+      body: 
+      SingleChildScrollView(
+              child: Padding(
+          padding: const EdgeInsets.only(top :90.0, left: 8, right: 8),
+          child: Center(
+            child : Form(
+              key: _formKey,
+              child: Column(
+                children : <Widget>[
+                           // numero de phone
+                            TextFormField(
+                              maxLength: 13,
+                              decoration: InputDecoration(hintText: "Numéro de téléphone"),
+                              controller: _numerodephone,
+                              validator: (val) => (_phoneRegex.hasMatch(val)) ? null : "numéro de telephone incorrecte",
+                            ),
+                            SizedBox(height: 10),
+                          // mot de passe
+                           TextFormField(
+                            validator: (val) => val.length >= 6 ? null : 'mot de passe non valide' ,
+                            controller: _password,
+                            obscureText: passwordhiden,
+                            decoration: InputDecoration(hintText: "Mot de passe",
+                             suffixIcon: IconButton(icon: Icon(Icons.remove_red_eye), 
+                             onPressed:()   {
+                               setState(() {
+                              passwordhiden = !passwordhiden;
+                              });
+                             }                      
+                           ),
+                           ),
                         ),
                         SizedBox(height: 10),
-                      // mot de passe
-                       TextFormField(
-                        validator: (val) => val.length >= 6 ? null : 'mot de passe non valide' ,
-                        controller: _password,
-                        obscureText: passwordhiden,
-                        decoration: InputDecoration(hintText: "mot de passe",
-                         suffixIcon: IconButton(icon: Icon(Icons.remove_red_eye), 
-                         onPressed:()   {
-                           setState(() {
-                          passwordhiden = !passwordhiden;
-                          });
-                         }                      
-                       ),
-                       ),
-                    ),
-                    SizedBox(height: 10),
-                    // boutton
-                    RaisedButton(
-                      color: Colors.lightGreen[400],
-                      child: Text("connexion"), onPressed: () async {
-                        if(_formKey.currentState.validate()){
-                         await (Connectivity().checkConnectivity()).then((connectivityResult) async{
-                          if (connectivityResult == ConnectivityResult.mobile || connectivityResult == ConnectivityResult.wifi) {
-                          setState(() {
-                           loading = false;
-                           erreur = '';
-                          });  
-                            await _auth.registerwithphone(_numerodephone.text , context).then((value) async{
-                              DatabaseReference _ref = _database.reference();
-                                  await  _ref.child("Userphone").child(_numerodephone.text
-                                  ).once().then((DataSnapshot snapshot) async{
-                                        numphone = await snapshot.value;
-                                        
-                                  }).then((onValue) async{
-                                    if (numphone == _password.text) {
-                                      await _ref.child("all_email").child(_numerodephone.text).once().then((DataSnapshot snapshot){
-                                        numchassi = snapshot.value;
-                                  });                       
-                                    setState(() {
-                                        loading = true;
-                                        erreur = '';
-                                    });
-                                    Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => Suite(num: numchassi)),);
-                                       }  
-                                       else{
-                                          setState(() {
-                                            loading = true;
-                                            erreur = 'mot de passe ou numéro de telephone incorrecte';
-                                      }); 
-                          }     
-                                  });
-
-
-                            });
-                         
-                         }
-                        else{
+                        // boutton
+                        RaisedButton(
+                          color: Colors.lightGreen[400],
+                          child: Text("connexion"), onPressed: () async {
+                            if(_formKey.currentState.validate()){
+                             await (Connectivity().checkConnectivity()).then((connectivityResult) async{
+                              if (connectivityResult == ConnectivityResult.mobile || connectivityResult == ConnectivityResult.wifi) {
                               setState(() {
-                                erreur = 'pas de connexion internet';
+                               loading = false;
+                               erreur = '';
+                              });  
+                                  DatabaseReference _ref = _database.reference();
+                                      await  _ref.child("Userphone").child(_numerodephone.text
+                                      ).once().then((DataSnapshot snapshot) async{
+                                            uid_password = await snapshot.value;
+                                            
+                                      }).then((onValue) async{
+                                        if (uid_password.split("//")[1] == _password.text) {                       
+                                        setState(() {
+                                            loading = true;
+                                            erreur = '';
+                                        });
+                                        Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => Suite(num: uid_password.split("//")[0 ])),);
+                                           }  
+                                           else{
+                                              setState(() {
+                                                loading = true;
+                                                erreur = 'mot de passe ou numéro de telephone incorrecte';
+                                          }); 
+                              }     
+                                      });
+
+
+                               
+                             
+                             }
+                            else{
+                                  setState(() {
+                                    erreur = 'pas de connexion internet';
+                                  });
+                                }
                               });
                             }
-                          });
-                        }
-                    },
+                        },
+                        ),
+                        Text(erreur,style: TextStyle(color:  Colors.red)),
+                        Text(message, style: TextStyle(color: Colors.green)),
+                    // mot de passe oublié
+                        InkWell(
+                   child: Text("mot de passe oublié ?" , style: TextStyle(color: Colors.grey[600],decoration: TextDecoration.underline),),
+                   onTap:() {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(builder: (context) => Password()),);
+                   }
+                  ),
+                        SizedBox(height: 10.0),
+                    // inscription
+                        InkWell(
+                      child: Text("Cliquez ici pour S'inscrire " , style: TextStyle(color: Colors.grey[600],decoration: TextDecoration.underline),),
+                      onTap:()  {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(builder: (context) => Phone()),);
+                        },
                     ),
-                    Text(erreur,style: TextStyle(color:  Colors.red)),
-                    Text(message, style: TextStyle(color: Colors.green))
-            ]
-          ) ,
+                ]
+              ) ,
+              ),
           ),
+        ),
       ),
     );
   }

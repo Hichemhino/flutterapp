@@ -1,11 +1,14 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutterappcarsecur/services/password_for_phone.dart';
+import 'package:flutterappcarsecur/wrapper/authenticate/Sign/motdepasse.dart';
+import 'package:flutterappcarsecur/wrapper/authenticate/Sign/signphone.dart';
 
 class Services {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   
   
-  FirebaseUser user_1;
+  bool user_1 = false;
   
   // sign in with anny
   Future signInAn() async {
@@ -34,6 +37,7 @@ class Services {
     try{
       AuthResult result  = await _auth.createUserWithEmailAndPassword(email: email, password: password);
       FirebaseUser user = result.user;
+      
       return(user.uid);
     }catch(e){
       print(e.toString());
@@ -62,31 +66,17 @@ class Services {
     }
   }
   // Sign with phone
-  Future<String> registerwithphone(String phone, BuildContext context) async{
-    TextEditingController code = TextEditingController();
-    try {
-      await _auth.verifyPhoneNumber(
-        phoneNumber: phone, 
-        timeout: Duration(minutes: 2),
-        ///////////////////////////////
-      verificationCompleted: (AuthCredential credential) async {
-        try {
-         Navigator.of(context).pop();
-          await  _auth.signInWithCredential(credential).then((AuthResult result){
-            user_1 = result.user;
-          });
-          if (user_1 != null)
-            return(user_1.uid);
-          else
-            return(null);
-        } catch (e){
-          print(e.toString());
-          return null;
-        }
-    },
-      codeSent: (String verificationid,[int forceresendingtoken]){
-        try {
-          showDialog(
+    Future registerwithphone(String phone, String verificationid,String sms,String user) async{
+      TextEditingController code = TextEditingController();
+     
+     /*final PhoneCodeAutoRetrievalTimeout autoretrieve = (String id){
+       verificationid = id;
+     };*/
+
+     /*final PhoneCodeSent codesent = (String verification,[int renvoyerlecode]){
+       verificationid = verification;
+       BuildContext context;
+        showDialog(
               context: context,
               barrierDismissible: false,
               builder: (context){
@@ -104,41 +94,126 @@ class Services {
                         onPressed: () async{
                            AuthCredential credential = PhoneAuthProvider.getCredential(verificationId: verificationid, smsCode: code.text);
                            await _auth.signInWithCredential(credential).then((AuthResult resultat){
-                             user_1 = resultat.user;
+                             user = resultat.user.uid;
+                             if (user != null){
+                               Navigator.of(context).pop();
+                               Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => Passwords(numphone: phone)));
+                             }
+                             else{
+                               Navigator.of(context).pop();
+                               Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => Signphone(sms: 'code de verification incorrecte')));
+                             }
+
                            });
                             }),
                     ],
                 );
               }
             );
-          if (user_1 != null)
-            return(user_1.uid);
-          else
-            return(null);   
-        } catch (e) {
-          print(e.toString());
-          return null;
-        }
 
-        },
-      codeAutoRetrievalTimeout: null, 
-      verificationFailed: (AuthException error) {
-           print(error.code);
-           user_1 = null;
-           return(user_1);
-         }, 
-        );
-    } catch (e) {
-      print(e.toString());
-      return null;
-    }
-  }
+     };*/
 
-  // Sign with phone
+     /*final PhoneVerificationCompleted verificationAvecSucce = (AuthCredential credential) async{
+       await _auth.signInWithCredential(credential).then((AuthResult result){
+          user = result.user.uid;
+       });
+     };*/
 
-  //
+     /*final PhoneVerificationFailed verificationAvecechec = (AuthException exception){
+       print("==> ${exception.message}");
+     };*/
+        _auth.verifyPhoneNumber(
+      phoneNumber: phone,
+      timeout: Duration(seconds: 120), 
+      verificationCompleted: (AuthCredential credential) async{
+       await _auth.signInWithCredential(credential).then((AuthResult result){
+          user = result.user.uid;
+       });
+      },
+      verificationFailed: (AuthException exception){
+       print("==> ${exception.message}");
+     },
+      codeSent: (String verification,[int renvoyerlecode]){
+       verificationid = verification;
+       BuildContext context;
+        showDialog(
+              context: context,
+              barrierDismissible: false,
+              builder: (context){
+                return AlertDialog(
+                  backgroundColor: Colors.green,
+                  content: 
+                    TextField(
+                        decoration: InputDecoration(hintText:"veuillez saisir votre code"),
+                        maxLength: 6,
+                        controller: code,
+                      ),
+                    actions: <Widget>[
+                      RaisedButton(
+                        child:Text("envoyer"),
+                        onPressed: () async{
+                           AuthCredential credential = PhoneAuthProvider.getCredential(verificationId: verificationid, smsCode: code.text);
+                           await _auth.signInWithCredential(credential).then((AuthResult resultat){
+                             user = resultat.user.uid;
+                             if (user != null){
+                               Navigator.of(context).pop();
+                               Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => Passwords(numphone: phone)));
+                             }
+                             else{
+                               Navigator.of(context).pop();
+                               Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => Signphone(sms: 'code de verification incorrecte')));
+                             }
 
-
-
+                           });
+                            }),
+                    ],
+                );
+              }
+            );
+     },
+      codeAutoRetrievalTimeout: null,
+      );
+      /*codeAutoRetrievalTimeout: (String id){
+       verificationid = id;
+      }*/
 
 }
+
+
+
+/*
+             showDialog(
+              context: context,
+              barrierDismissible: false,
+              builder: (context){
+                return AlertDialog(
+                  backgroundColor: Colors.green,
+                  content: 
+                    TextField(
+                        decoration: InputDecoration(hintText:"veuillez saisir votre code"),
+                        maxLength: 6,
+                        controller: code,
+                      ),
+                    actions: <Widget>[
+                      RaisedButton(
+                        child:Text("envoyer"),
+                        onPressed: () async{
+                           AuthCredential credential = PhoneAuthProvider.getCredential(verificationId: verificationid, smsCode: code.text);
+                           await _auth.signInWithCredential(credential).then((AuthResult resultat){
+                             user = resultat.user;
+                             if (user != null){
+                               Navigator.of(context).pop();
+                               Navigator.of(context).pushReplacementNamed('/');
+                             }
+                             else{
+                               Navigator.of(context).pop();
+                             }
+
+                           });
+                            }),
+                    ],
+                );
+              }
+            );
+*/
+  } 

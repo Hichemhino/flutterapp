@@ -1,11 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutterappcarsecur/wrapper/authenticate/Sign/registeremail.dart';
-import 'package:flutterappcarsecur/wrapper/authenticate/Sign/registerphone.dart';
-import 'package:flutterappcarsecur/wrapper/authenticate/Sign/signemail.dart';
-import 'package:flutterappcarsecur/wrapper/authenticate/Sign/signphone.dart';
 import 'package:flutterappcarsecur/wrapper/home/page2.dart';
-import 'package:flutterappcarsecur/wrapper/load/load.dart';
+import 'package:flutterappcarsecur/wrapper/wrapper.dart';
+
 
 Future<String> synchronisation() async{
   try {
@@ -35,7 +32,7 @@ class _HomeState extends State<Home> {
               return Suite(num: snapshot.data);
             }
           else {
-            return Phone();
+            return Wrapper();
           }
      }
      )

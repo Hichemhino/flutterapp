@@ -3,10 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:flutterappcarsecur/services/auth.dart';
 import 'package:flutterappcarsecur/wrapper/authenticate/Sign/motdepasse.dart';
 import 'package:connectivity/connectivity.dart';
+import 'package:flutterappcarsecur/wrapper/authenticate/Sign/registeremail.dart';
 import 'package:flutterappcarsecur/wrapper/authenticate/Sign/signphone.dart';
 import 'package:flutterappcarsecur/wrapper/home/page2.dart';
 import 'package:flutterappcarsecur/wrapper/load/load.dart';
-import 'package:flutterappcarsecur/wrapper/wrapper.dart';
+
 
 class Sign extends StatefulWidget {
   @override
@@ -36,11 +37,17 @@ class _SignState extends State<Sign> {
       return  Scaffold(
         appBar: AppBar(
           backgroundColor: Colors.green[400],
-          title: Text("Sign In with email"),
+        title: RichText(
+                text: TextSpan(
+                    children: [
+                        TextSpan(text:"connexion",style: TextStyle( fontSize: 20 )),
+                      ],
+                ),
+              ),
           actions: <Widget>[
           FlatButton.icon(
             icon: Icon(Icons.phone,color: Colors.white,),
-            label: Text('Sing In', style : TextStyle(color: Colors.white,letterSpacing: 1.0 ),),
+            label: Text('', style : TextStyle(color: Colors.white ),),
             onPressed: () async{
                dynamic result = _auth.singOutAccount();
                if(result != null){
@@ -52,104 +59,107 @@ class _SignState extends State<Sign> {
         ),
         body: 
         SingleChildScrollView(
-            child: Column(
-            children: <Widget>[
-              Form(
-                key: _formkey,
-                child : Column(
-                  children : <Widget>[
-                    // email
-                    TextFormField(
-                      validator: (val) => val.contains(emailRegex) ? null : 'email non valide' ,
-                      controller: _email,
-                      decoration: InputDecoration(hintText: "Email"),
-                    ),
-                    SizedBox(height: 10),
-                    // mot de passe
-                    TextFormField(
-                        validator: (val) => val.length >= 6 ? null : 'mot de passe non valide' ,
-                        controller: _password,
-                        obscureText: passwordhiden,
-                        decoration: InputDecoration(hintText: "mot de passe",
-                         suffixIcon: IconButton(icon: Icon(Icons.remove_red_eye), 
-                      onPressed:()   {
-                        setState(() {
-                          passwordhiden = !passwordhiden;
-                        });
-                       }                      
-                      ),),
-                    ),
-                    SizedBox(height: 10.0),
-                    // boutton
-                    RaisedButton(
-                      color: Colors.lightGreen[400],
-                      child: Text("connexion"), onPressed: () async {
-                        if(_formkey.currentState.validate()){
-                         await (Connectivity().checkConnectivity()).then((connectivityResult) async{
-                          if (connectivityResult == ConnectivityResult.mobile || connectivityResult == ConnectivityResult.wifi) {
+            child: Padding(
+              padding: const EdgeInsets.only(top :90.0, left: 8, right: 8),
+              child: Column(
+              children: <Widget>[
+                Form(
+                  key: _formkey,
+                  child : Column(
+                    children : <Widget>[
+                      // email
+                      TextFormField(
+                        validator: (val) => val.contains(emailRegex) ? null : 'email non valide' ,
+                        controller: _email,
+                        decoration: InputDecoration(hintText: "Email"),
+                      ),
+                      SizedBox(height: 10),
+                      // mot de passe
+                      TextFormField(
+                          validator: (val) => val.length >= 6 ? null : 'mot de passe non valide' ,
+                          controller: _password,
+                          obscureText: passwordhiden,
+                          decoration: InputDecoration(hintText: "Mot de passe",
+                           suffixIcon: IconButton(icon: Icon(Icons.remove_red_eye), 
+                        onPressed:()   {
                           setState(() {
-                           loading = false;
-                           erreur = '';
-                          });  
-                         dynamic result = await _auth.signInwithEmailandPassword(_email.text,_password.text);
-                         if(result != null){
-                            DatabaseReference _ref = FirebaseDatabase.instance.reference().child("all_email").child(_email.text
-                            .split(".")[0]);
-                            await  _ref.once().then((DataSnapshot snapshot){
-                                  uid = snapshot.value;
-                            }).then((onValue){
-                                setState(() {
-                                  loading = true;
-                                  erreur = '';
-                              });
-                              print("uid  = " + uid + "  result  = " + result);
-                              Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => Suite(num: uid)));
-                            });
-                         }
-                          else{
-                            setState(() {
-                            loading = true;
-                             erreur = 'mot de passe ou email incorrecte';
-                          }); 
-                          }
-                         }
-                        else{
-                              setState(() {
-                                erreur = 'pas de connexion internet';
-                              });
-                            }
+                            passwordhiden = !passwordhiden;
                           });
-                        }
-                    },
+                         }                      
+                        ),),
+                      ),
+                      SizedBox(height: 10.0),
+                      // boutton
+                      RaisedButton(
+                        color: Colors.lightGreen[400],
+                        child: Text("connexion"), onPressed: () async {
+                          if(_formkey.currentState.validate()){
+                           await (Connectivity().checkConnectivity()).then((connectivityResult) async{
+                            if (connectivityResult == ConnectivityResult.mobile || connectivityResult == ConnectivityResult.wifi) {
+                            setState(() {
+                             loading = false;
+                             erreur = '';
+                            });  
+                           dynamic result = await _auth.signInwithEmailandPassword(_email.text,_password.text);
+                           if(result != null){
+                              DatabaseReference _ref = FirebaseDatabase.instance.reference().child("all_email").child(_email.text
+                              .split(".")[0]);
+                              await  _ref.once().then((DataSnapshot snapshot){
+                                    uid = snapshot.value;
+                              }).then((onValue){
+                                  setState(() {
+                                    loading = true;
+                                    erreur = '';
+                                });
+                                print("uid  = " + uid + "  result  = " + result);
+                                Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => Suite(num: uid)));
+                              });
+                           }
+                            else{
+                              setState(() {
+                              loading = true;
+                               erreur = 'mot de passe ou email incorrecte';
+                            }); 
+                            }
+                           }
+                          else{
+                                setState(() {
+                                  erreur = 'pas de connexion internet';
+                                });
+                              }
+                            });
+                          }
+                      },
+                      ),
+                      Text(erreur,style: TextStyle(color: Colors.red),),
+                      SizedBox(height: 5.0),
+                      Text(message , style: TextStyle(color : Colors.red)),
+                      SizedBox(height: 10.0),
+                      // mot de passe oublié
+                     InkWell(
+                     child: Text("mot de passe oublié ?" , style: TextStyle(color: Colors.grey[600],decoration: TextDecoration.underline),),
+                     onTap:() {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(builder: (context) => Password()),);
+                     }
                     ),
-                    Text(erreur,style: TextStyle(color: Colors.red),),
-                    SizedBox(height: 5.0),
-                    Text(message , style: TextStyle(color : Colors.red)),
-                    SizedBox(height: 10.0),
-                    // mot de passe oublié
-                   InkWell(
-                   child: Text("mot de passe oublié ?" , style: TextStyle(color: Colors.grey[600],decoration: TextDecoration.underline),),
-                   onTap:() {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(builder: (context) => Password()),);
-                   }
-                  ),
-                    SizedBox(height: 10.0),
-                    // inscription
-                    InkWell(
-                      child: Text("Cliquez ici pour S'inscrire " , style: TextStyle(color: Colors.grey[600],decoration: TextDecoration.underline),),
-                      onTap:()  {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(builder: (context) => Wrapper()),);
-                        },
-                    ),
-                    
-                  ]
+                      SizedBox(height: 10.0),
+                      // inscription
+                      InkWell(
+                        child: Text("Cliquez ici pour S'inscrire " , style: TextStyle(color: Colors.grey[600],decoration: TextDecoration.underline),),
+                        onTap:()  {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(builder: (context) => Register()),);
+                          },
+                      ),
+                      
+                    ]
 
+                  ),
                 ),
-              ),
-            ],
+              ],
           ),
+            ),
         ),
 
     );
